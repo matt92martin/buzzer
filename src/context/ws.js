@@ -3,8 +3,7 @@ import { io } from 'socket.io-client'
 
 const SocketContext = React.createContext({})
 
-const URL = 'localhost:3000'
-const socket = io(URL, { autoConnect: false })
+const socket = io({ autoConnect: false })
 
 socket.onAny((event, ...args) => {
     console.log(event, args)
