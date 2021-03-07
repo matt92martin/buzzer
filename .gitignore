@@ -3,3 +3,4 @@ config.js
 .env
 node_modules
 db.sqlite
+GameData.json

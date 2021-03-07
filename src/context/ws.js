@@ -18,11 +18,17 @@ const SocketProvider = (props) => {
         socket.emit('reset_buzzer')
     }
 
+    const logout = () => {
+        console.log('logout')
+        socket.emit('logout')
+    }
+
     const value = {
         io: socket,
         users,
         winner,
         resetBuzzer,
+        logout,
     }
 
     React.useEffect(() => {
@@ -54,12 +60,8 @@ const SocketProvider = (props) => {
     return <SocketContext.Provider value={value} {...props} />
 }
 
-const useWS = () => {
+const useSocket = () => {
     return React.useContext(SocketContext)
 }
 
-const useSocket = () => {
-    return useWS()
-}
-
-export { SocketProvider, useWS, useSocket }
+export { SocketProvider, useSocket }

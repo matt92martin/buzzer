@@ -13,5 +13,6 @@ router.use(async (req, res, next) => {
 })
 
 router.use('/user', require('./user'))
+router.use('/game', require('./game'))
 
 module.exports = router

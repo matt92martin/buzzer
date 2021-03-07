@@ -4,7 +4,9 @@ const webpack = require('webpack')
 const cookieParser = require('cookie-parser')
 const middleware = require('webpack-dev-middleware')
 const compiler = webpack(require('./webpack.config'))
-const { cookieSecret, PORT } = require('./config')
+const { cookieSecret, PORT, cookieName, gameCookieName } = require('./config')
+// const cookie = require('cookie')
+const { parseSignedCookies } = require('./util/signedCookies')
 
 const isDev = process.env.NODE_ENV === 'development'
 
@@ -21,9 +23,16 @@ if (isDev) {
     app.use(middleware(compiler))
 }
 
-app.use(require('./server/routes'))
+app.use('/api', require('./server/routes'))
 
-app.get('/', (req, res) => {
+// app.use((req, res, next) => {
+//     const cookie = req.cookies
+//     const gamecookie = req.signedCookies
+//     console.log({ cookie, gamecookie })
+//     next()
+// })
+
+app.get('*', (req, res) => {
     res.render('index')
 })
 
@@ -31,12 +40,23 @@ const server = http.createServer(app)
 const io = require('socket.io')(server)
 
 io.use((socket, next) => {
-    const username = socket.handshake.auth.username
-    if (!username) {
-        return next(new Error('invalid username'))
+    // const username = socket.handshake.auth.username
+    let gameRoom, userInfo
+    try {
+        gameRoom = parseSignedCookies(socket.handshake.headers.cookie, cookieSecret, gameCookieName)
+        userInfo = parseSignedCookies(socket.handshake.headers.cookie, cookieSecret, cookieName)
+    } catch (e) {
+        console.error(e)
     }
-    socket.username = username
-    socket.info = { color: socket.handshake.auth.color }
+
+    if (gameRoom !== undefined) {
+        socket.gameRoom = gameRoom
+    }
+
+    if (userInfo !== undefined) {
+        socket.username = userInfo.username
+        socket.info = { color: userInfo.color }
+    }
     next()
 })
 
@@ -45,8 +65,8 @@ const getUsers = () => {
     for (let [id, socket] of io.of('/').sockets) {
         users.push({
             userId: id,
-            username: socket.username,
-            color: socket.info.color,
+            username: socket?.username,
+            color: socket?.info?.color,
         })
     }
     return users
@@ -68,6 +88,9 @@ io.on('connection', (socket) => {
             buzzer.hasWinner = true
             io.emit('winner', socket.id)
         }
+    })
+    socket.on('logout', () => {
+        console.log('io logout')
     })
 
     socket.on('reset_buzzer', () => {
