@@ -3,9 +3,10 @@ import { useHistory } from 'react-router-dom'
 import React from 'react'
 import axios from 'axios'
 
-const CreateGame = () => {
+const ModJoinGame = () => {
     const userContext = useUser()
     const history = useHistory()
+    const [gamePassword, setGamePassword] = React.useState('')
     const [moderator, setModerator] = React.useState('')
     const [moderatorPassword, setModeratorPassword] = React.useState('')
 
@@ -13,9 +14,10 @@ const CreateGame = () => {
         e.preventDefault()
 
         axios
-            .post('/api/game/create', {
+            .post('/api/game/login', {
                 moderator,
                 moderatorPassword,
+                gamePassword,
             })
             .then((res) => {
                 userContext.setUsername({
@@ -32,7 +34,16 @@ const CreateGame = () => {
     return (
         <div>
             <form onSubmit={onSubmit}>
-                <h2>Create New Game</h2>
+                <h2>Login to Game</h2>
+                <div>
+                    <input
+                        type="text"
+                        name="game_password"
+                        placeholder="Game hash..."
+                        onChange={(e) => setGamePassword(e.target.value)}
+                        value={gamePassword}
+                    />
+                </div>
                 <div>
                     <input
                         type="text"
@@ -59,4 +70,4 @@ const CreateGame = () => {
     )
 }
 
-export { CreateGame }
+export { ModJoinGame }

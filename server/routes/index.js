@@ -12,7 +12,8 @@ router.use(async (req, res, next) => {
     next()
 })
 
-router.use('/user', require('./user'))
+const { UserRouter } = require('./user')
+router.use('/user', UserRouter)
 router.use('/game', require('./game'))
 
 module.exports = router

@@ -3,14 +3,16 @@ const http = require('http')
 const webpack = require('webpack')
 const cookieParser = require('cookie-parser')
 const middleware = require('webpack-dev-middleware')
+// const redis = require('redis')
 const compiler = webpack(require('./webpack.config'))
 const { cookieSecret, PORT, cookieName, gameCookieName } = require('./config')
-// const cookie = require('cookie')
 const { parseSignedCookies } = require('./util/signedCookies')
+const { jwtVerify } = require('./server/db/jwt')
 
 const isDev = process.env.NODE_ENV === 'development'
 
 const app = express()
+// const redisDB = redis.createClient()
 
 app.set('view engine', 'pug')
 app.set('views', 'template')
@@ -25,38 +27,40 @@ if (isDev) {
 
 app.use('/api', require('./server/routes'))
 
-// app.use((req, res, next) => {
-//     const cookie = req.cookies
-//     const gamecookie = req.signedCookies
-//     console.log({ cookie, gamecookie })
-//     next()
-// })
-
 app.get('*', (req, res) => {
     res.render('index')
 })
 
+const setUserInfo = async (socket) => {
+    try {
+        const gameRoomCookie = parseSignedCookies(socket.handshake.headers.cookie, cookieSecret, gameCookieName)
+
+        socket.info = {
+            ...socket.info,
+            gameRoom: gameRoomCookie,
+        }
+
+        const userInfoCookie = parseSignedCookies(socket.handshake.headers.cookie, cookieSecret, cookieName)
+        const userInfoJson = await jwtVerify(userInfoCookie).catch((e) => ({}))
+
+        socket.info = {
+            ...socket.info,
+            username: userInfoJson.username,
+            color: userInfoJson.color,
+            moderator: userInfoJson.moderator,
+        }
+    } catch (e) {
+        console.error('IO Middleware: ', e)
+    } finally {
+        // socket.emit('me', socket.info)
+    }
+}
+
 const server = http.createServer(app)
 const io = require('socket.io')(server)
 
-io.use((socket, next) => {
-    // const username = socket.handshake.auth.username
-    let gameRoom, userInfo
-    try {
-        gameRoom = parseSignedCookies(socket.handshake.headers.cookie, cookieSecret, gameCookieName)
-        userInfo = parseSignedCookies(socket.handshake.headers.cookie, cookieSecret, cookieName)
-    } catch (e) {
-        console.error(e)
-    }
-
-    if (gameRoom !== undefined) {
-        socket.gameRoom = gameRoom
-    }
-
-    if (userInfo !== undefined) {
-        socket.username = userInfo.username
-        socket.info = { color: userInfo.color }
-    }
+io.use(async (socket, next) => {
+    // await setUserInfo(socket)
     next()
 })
 
@@ -65,7 +69,7 @@ const getUsers = () => {
     for (let [id, socket] of io.of('/').sockets) {
         users.push({
             userId: id,
-            username: socket?.username,
+            username: socket?.info?.username,
             color: socket?.info?.color,
         })
     }
@@ -77,10 +81,35 @@ const buzzer = {
 }
 
 io.on('connection', (socket) => {
-    io.emit('users', getUsers())
+    // io.emit('users', getUsers())
+    socket.emit('me', socket.info)
 
     socket.onAny((event, ...args) => {
-        console.log(event, args)
+        console.log('Logger: ', event, args)
+    })
+
+    socket.on('connect', () => {
+        console.log(socket.info)
+    })
+
+    socket.on('changeInfo', async (info) => {
+        socket.info = {
+            ...socket.info,
+            gameRoom: info.gameRoom,
+            username: info.username,
+            color: info.color,
+        }
+        console.log(socket.info)
+        socket.emit('me', socket.info)
+    })
+
+    socket.on('join', () => {
+        socket.join(`gameRoom${socket.info.gameRoom}`)
+    })
+
+    socket.on('userNameUpdate', () => {
+        console.log(socket.info)
+        console.log(socket.handshake.headers.cookie)
     })
 
     socket.on('buzzer', () => {
@@ -89,6 +118,9 @@ io.on('connection', (socket) => {
             io.emit('winner', socket.id)
         }
     })
+
+    socket.on('set_moderator', () => {})
+
     socket.on('logout', () => {
         console.log('io logout')
     })

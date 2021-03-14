@@ -1,8 +1,8 @@
 import React from 'react'
 import { Switch, Route } from 'react-router-dom'
 import { Game } from './game'
-import { JoinGame } from './joinGame'
-import { CreateGame } from '../component/createGame'
+import { JoinGame } from '../component/joinGame'
+import { StartGame } from './startGame'
 import { Nav } from '../component/nav'
 
 const Home = () => {
@@ -17,7 +17,7 @@ const Home = () => {
                     <Game />
                 </Route>
                 <Route>
-                    <CreateGame />
+                    <StartGame />
                 </Route>
             </Switch>
         </>

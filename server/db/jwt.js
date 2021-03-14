@@ -5,7 +5,7 @@ const jwtSign = (obj) => {
     return new Promise((res, rej) => {
         jwt.sign(obj, jwtSecret, { expiresIn: '7d' }, function (err, token) {
             if (err) {
-                return rej('Error')
+                return rej(err)
             }
             res(token)
         })
@@ -16,7 +16,7 @@ const jwtVerify = (token) => {
     return new Promise((res, rej) => {
         jwt.verify(token, jwtSecret, function (err, decoded) {
             if (err) {
-                return rej('Error')
+                return rej(err)
             }
             res(decoded)
         })

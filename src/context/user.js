@@ -5,11 +5,11 @@ import { useGet } from '../hooks/useGet'
 const UserContext = React.createContext({})
 
 export const UserProvider = (props) => {
-    const [userObj, setUserObj] = useGet('/user/name')
+    const [userObj, setUserObj] = useGet('/api/user/name')
 
     const createUserName = async ({ username, color }) => {
         if (username) {
-            const { data } = await axios.post('/user/name', { username, color })
+            const { data } = await axios.post('/api/user/name', { username, color })
             if (data.error) {
                 return { error: true }
             }
@@ -19,14 +19,19 @@ export const UserProvider = (props) => {
 
         return { error: true }
     }
+
+    const setUsername = () => {
+        setUserObj()
+    }
     const logout = async () => {
-        const { data } = await axios.post('/user/logout')
+        const { data } = await axios.post('/api/user/logout')
         setUserObj({})
     }
 
     const value = {
         createUserName,
         userObj,
+        setUsername,
         logout,
     }
 

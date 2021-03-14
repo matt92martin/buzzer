@@ -5,17 +5,18 @@ const { v4: uuidV4 } = require('uuid')
 
 const router = Router()
 
+const createUser = async ({ username, color, moderator, uuid }) => {
+    return await jwtSign({ username, uuid, color, moderator })
+}
+
 router.post('/name', async (req, res) => {
     let { username, color } = req.body
 
-    if (username === adminName) {
-        color = 'admin'
-    }
-
     const uuid = uuidV4()
-    const token = await jwtSign({ username, uuid, color })
+    const token = await createUser({ username, color })
+
     res.cookie(cookieName, token, { signed: true, sameSite: 'strict' })
-    res.json({ success: true, user: { username, uuid, color } })
+    res.json({ success: true, user: { username, color, uuid } })
 })
 
 router.get('/name', (req, res) => {
@@ -32,4 +33,4 @@ router.post('/logout', (req, res) => {
     res.json({ success: true })
 })
 
-module.exports = router
+module.exports = { UserRouter: router, createUser }

@@ -1,8 +1,7 @@
 import React from 'react'
-import { useSocket } from '../context/ws'
-import { useUser } from '../context/user'
 import { useParams, useHistory } from 'react-router-dom'
 import axios from 'axios'
+import { ChangeName } from '../component/changeName'
 
 const GameWindow = ({ children }) => {
     const { id } = useParams()
@@ -21,54 +20,13 @@ const GameWindow = ({ children }) => {
     if (!isLoggedIn) return <div>Loading...</div>
 
     return <div>{children}</div>
-    // console.log(params)
-    // const socket = useSocket()
-    // const user = useUser()
-    //
-    // const logout = () => {
-    //     user.logout()
-    //     socket.io.disconnect()
-    // }
-    //
-    // const red = socket.users.filter((user) => user.color === 'red')
-    // const blue = socket.users.filter((user) => user.color === 'blue')
-
-    // return (
-    //     <div>
-    //         <div>Blue</div>
-    //         <ul>
-    //             {blue.map((user) => (
-    //                 <li key={user.userId}>
-    //                     {user.username}
-    //                     {user.winner && ' - Winner'}
-    //                 </li>
-    //             ))}
-    //         </ul>
-    //         <div>Red</div>
-    //         <ul>
-    //             {red.map((user) => (
-    //                 <li key={user.userId}>
-    //                     {user.username}
-    //                     {user.winner && ' - Winner'}
-    //                 </li>
-    //             ))}
-    //         </ul>
-    //         <button onClick={() => socket.io.emit('buzzer')}>Buzzer</button>
-    //         {user.userObj.color === 'admin' && <button onClick={() => socket.resetBuzzer()}>Reset</button>}
-    //         <button onClick={logout}>Change Name</button>
-    //     </div>
-    // )
 }
 
 const Game = () => {
-    const socket = useSocket()
-
-    React.useEffect(() => {
-        socket.io.connect()
-    }, [])
     return (
         <GameWindow>
             <div>Game</div>
+            <ChangeName />
         </GameWindow>
     )
 }

@@ -1,11 +1,13 @@
 import React from 'react'
 import { useHistory, useParams } from 'react-router-dom'
 import axios from 'axios'
+import { useSocket } from '../context/ws'
 
 const JoinGame = () => {
+    const socket = useSocket()
     const history = useHistory()
     const { id } = useParams()
-    const [gameId, setGameId] = React.useState(id)
+    const [gameId, setGameId] = React.useState(id || '')
     const gameIdRef = React.useRef(null)
     const onSubmit = (e) => {
         e.preventDefault()
@@ -13,6 +15,9 @@ const JoinGame = () => {
             .post(`/api/game`, { gamePassword: gameId })
             .then((res) => {
                 if (res.data.id) {
+                    socket.io.emit('changeInfo', {
+                        gameRoom: gameId,
+                    })
                     history.push(`/game/${res.data.id}`)
                 }
             })
