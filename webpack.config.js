@@ -1,7 +1,8 @@
 const path = require('path')
 const extract = require('mini-css-extract-plugin')
+const CopyPlugin = require('copy-webpack-plugin')
 
-module.exports = {
+const config = {
     entry: './src/index.js',
     output: {
         path: path.resolve(__dirname, 'dist'),
@@ -52,3 +53,14 @@ module.exports = {
     },
     mode: 'development',
 }
+
+if (process.env.NODE_ENV === 'production') {
+    config.mode = 'production'
+    config.plugins.push(
+        new CopyPlugin({
+            patterns: [{ from: './public/favicon.ico', to: 'favicon.ico' }],
+        })
+    )
+}
+
+module.exports = config

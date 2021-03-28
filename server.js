@@ -18,7 +18,7 @@ app.set('views', 'template')
 
 app.use(cookieParser(cookieSecret))
 app.use(express.json())
-app.use(express.static('public'))
+app.use(express.static('dist'))
 
 if (isDev) {
     app.use(middleware(compiler))
@@ -80,8 +80,6 @@ const buzzer = {
 }
 
 io.on('connection', (socket) => {
-    // io.emit('users', getUsers())
-
     const eventHandlers = {
         user: new UserSocket(io, socket),
     }
@@ -99,9 +97,9 @@ io.on('connection', (socket) => {
         console.log('Logger: ', event, args)
     })
 
-    socket.on('connect', () => {
-        console.log(socket.info)
-    })
+    // socket.on('connect', () => {
+    //     console.log(socket.info)
+    // })
 
     socket.on('changeInfo', async (info) => {
         socket.info = {

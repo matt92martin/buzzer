@@ -1,5 +1,5 @@
 const { Router } = require('express')
-const { cookieName, adminName } = require('../../config')
+const { cookieName } = require('../../config')
 const { jwtSign } = require('../db/jwt')
 const { v4: uuidV4 } = require('uuid')
 

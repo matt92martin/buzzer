@@ -4,7 +4,10 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "dev": "NODE_ENV=development nodemon --watch server.js --watch src --watch server --watch util --watch models server.js"
+        "dev": "NODE_ENV=development nodemon -r dotenv/config --watch server.js --watch src --watch server --watch util --watch models server.js",
+        "build": "NODE_ENV=production webpack",
+        "start": "NODE_ENV=production node server.js",
+        "start:local": "NODE_ENV=production node -r dotenv/config server.js "
     },
     "author": "",
     "license": "ISC",
@@ -17,6 +20,7 @@
         "babel-plugin-styled-components": "^1.12.0",
         "cookie": "^0.4.1",
         "cookie-parser": "^1.4.5",
+        "copy-webpack-plugin": "^8.1.0",
         "css-loader": "^5.0.2",
         "express": "^4.17.1",
         "jsonwebtoken": "^8.5.1",
@@ -26,7 +30,6 @@
         "react": "^17.0.1",
         "react-dom": "^17.0.1",
         "react-router-dom": "^5.2.0",
-        "redis": "^3.0.2",
         "sass": "^1.32.8",
         "sass-loader": "^11.0.1",
         "sequelize": "^6.5.0",
@@ -43,6 +46,7 @@
         "webpack-dev-server": "^3.11.2"
     },
     "devDependencies": {
-        "prettier": "2.2.1"
+        "prettier": "2.2.1",
+        "dotenv": "^8.2.0"
     }
 }
