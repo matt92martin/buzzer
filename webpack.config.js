@@ -1,7 +1,7 @@
 const path = require('path')
 const extract = require('mini-css-extract-plugin')
 
-module.exports = {
+const config = {
     entry: './src/index.js',
     output: {
         path: path.resolve(__dirname, 'dist'),
@@ -50,5 +50,11 @@ module.exports = {
         port: 3001,
         '/api': 'http://localhost:3000',
     },
-    mode: 'development',
+    mode: 'production',
 }
+
+if (process.env.NODE_ENV !== 'production') {
+    config.mode = 'development'
+}
+
+module.exports = config

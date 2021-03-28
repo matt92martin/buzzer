@@ -4,7 +4,8 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "dev": "NODE_ENV=development nodemon -r dotenv/config --watch server.js --watch src --watch server --watch util --watch models server.js"
+        "dev": "NODE_ENV=development nodemon -r dotenv/config --watch server.js --watch src --watch server --watch util --watch models server.js",
+        "build": "NODE_ENV=production webpack"
     },
     "author": "",
     "license": "ISC",
