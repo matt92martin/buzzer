@@ -4,7 +4,7 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "dev": "NODE_ENV=development nodemon --watch server.js --watch src --watch server --watch util server.js"
+        "dev": "NODE_ENV=development nodemon --watch server.js --watch src --watch server --watch util --watch models server.js"
     },
     "author": "",
     "license": "ISC",

@@ -3,16 +3,15 @@ const http = require('http')
 const webpack = require('webpack')
 const cookieParser = require('cookie-parser')
 const middleware = require('webpack-dev-middleware')
-// const redis = require('redis')
 const compiler = webpack(require('./webpack.config'))
 const { cookieSecret, PORT, cookieName, gameCookieName } = require('./config')
 const { parseSignedCookies } = require('./util/signedCookies')
 const { jwtVerify } = require('./server/db/jwt')
+const UserSocket = require('./server/sockets/user')
 
 const isDev = process.env.NODE_ENV === 'development'
 
 const app = express()
-// const redisDB = redis.createClient()
 
 app.set('view engine', 'pug')
 app.set('views', 'template')
@@ -41,7 +40,7 @@ const setUserInfo = async (socket) => {
         }
 
         const userInfoCookie = parseSignedCookies(socket.handshake.headers.cookie, cookieSecret, cookieName)
-        const userInfoJson = await jwtVerify(userInfoCookie).catch((e) => ({}))
+        const userInfoJson = await jwtVerify(userInfoCookie).catch(() => ({}))
 
         socket.info = {
             ...socket.info,
@@ -82,7 +81,19 @@ const buzzer = {
 
 io.on('connection', (socket) => {
     // io.emit('users', getUsers())
-    socket.emit('me', socket.info)
+
+    const eventHandlers = {
+        user: new UserSocket(io, socket),
+    }
+
+    for (let category in eventHandlers) {
+        const handler = eventHandlers[category].handler
+        for (let event in handler) {
+            socket.on(event, handler[event])
+        }
+    }
+
+    // socket.emit('me', socket.info)
 
     socket.onAny((event, ...args) => {
         console.log('Logger: ', event, args)
