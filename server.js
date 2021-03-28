@@ -18,7 +18,7 @@ app.set('views', 'template')
 
 app.use(cookieParser(cookieSecret))
 app.use(express.json())
-app.use(express.static('public'))
+app.use(express.static('dist'))
 
 if (isDev) {
     app.use(middleware(compiler))

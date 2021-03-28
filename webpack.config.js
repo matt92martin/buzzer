@@ -1,5 +1,6 @@
 const path = require('path')
 const extract = require('mini-css-extract-plugin')
+const CopyPlugin = require('copy-webpack-plugin')
 
 const config = {
     entry: './src/index.js',
@@ -50,11 +51,16 @@ const config = {
         port: 3001,
         '/api': 'http://localhost:3000',
     },
-    mode: 'production',
+    mode: 'development',
 }
 
-if (process.env.NODE_ENV !== 'production') {
-    config.mode = 'development'
+if (process.env.NODE_ENV === 'production') {
+    config.mode = 'production'
+    config.plugins.push(
+        new CopyPlugin({
+            patterns: [{ from: './public/favicon.ico', to: 'favicon.ico' }],
+        })
+    )
 }
 
 module.exports = config
