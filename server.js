@@ -8,6 +8,7 @@ const { cookieSecret, PORT, cookieName, gameCookieName } = require('./config')
 const { parseSignedCookies } = require('./util/signedCookies')
 const { jwtVerify } = require('./server/db/jwt')
 const UserSocket = require('./server/sockets/user')
+const sslRedirect = require('./util/general').sslRedirect
 
 const isDev = process.env.NODE_ENV === 'development'
 
@@ -16,6 +17,7 @@ const app = express()
 app.set('view engine', 'pug')
 app.set('views', 'template')
 
+app.use(sslRedirect)
 app.use(cookieParser(cookieSecret))
 app.use(express.json())
 app.use(express.static('dist'))
