@@ -17,7 +17,7 @@ const app = express()
 app.set('view engine', 'pug')
 app.set('views', 'template')
 
-app.use(sslRedirect)
+app.use(sslRedirect())
 app.use(cookieParser(cookieSecret))
 app.use(express.json())
 app.use(express.static('dist'))
