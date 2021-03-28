@@ -5,6 +5,10 @@
       "size": "hobby"
     }
   },
+  "addons": [
+    "heroku-postgresql:hobby-dev",
+    "papertrail:choklad"
+  ],
   "environments": {
     "review": {
       "formation": {
