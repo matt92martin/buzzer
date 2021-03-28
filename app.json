@@ -1,0 +1,18 @@
+{
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "hobby"
+    }
+  },
+  "environments": {
+    "review": {
+      "formation": {
+        "web": {
+          "quantity": 1,
+          "size": "hobby"
+        }
+      }
+    }
+  }
+}
