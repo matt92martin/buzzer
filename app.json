@@ -1,14 +1,4 @@
 {
-  "formation": {
-    "web": {
-      "quantity": 1,
-      "size": "hobby"
-    }
-  },
-  "addons": [
-    "heroku-postgresql:hobby-dev",
-    "papertrail:choklad"
-  ],
   "environments": {
     "review": {
       "formation": {
@@ -16,7 +6,11 @@
           "quantity": 1,
           "size": "hobby"
         }
-      }
+      },
+      "addons": [
+        "heroku-postgresql:hobby-dev",
+        "papertrail:choklad"
+      ]
     }
   }
 }

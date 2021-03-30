@@ -1,12 +1,16 @@
-const path = require('path')
-
 module.exports = {
     development: {
-        dialect: 'sqlite',
-        storage: path.resolve('server', 'db', 'db.sqlite'),
+        dialect: 'postgres',
+        url: process.env.DATABASE_URL,
     },
     production: {
-        dialect: 'sqlite',
-        storage: path.resolve('server', 'db', 'db.sqlite'),
+        dialect: 'postgres',
+        use_env_variable: 'DATABASE_URL',
+        dialectOptions: {
+            ssl: {
+                require: true,
+                rejectUnauthorized: false,
+            },
+        },
     },
 }
