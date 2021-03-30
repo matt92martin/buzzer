@@ -1,15 +1,8 @@
 import React from 'react'
-import { io } from 'socket.io-client'
 
 const SocketContext = React.createContext({})
 
-const socket = io({ autoConnect: false })
-
-// socket.onAny((event, ...args) => {
-//     console.log(event, args)
-// })
-
-const SocketProvider = (props) => {
+const SocketProvider = ({ socket, ...props }) => {
     const [user, setUser] = React.useState(null)
     const [users, setUsers] = React.useState([])
     const [game, setGame] = React.useState({})
@@ -30,6 +23,7 @@ const SocketProvider = (props) => {
     const value = {
         io: socket,
         setGame,
+        game,
         users,
         user,
         connected,
@@ -39,7 +33,8 @@ const SocketProvider = (props) => {
     }
 
     React.useEffect(() => {
-        if (connected) {
+        // if (connected) {
+        if (true) {
             socket.on('connect_error', (err) => {
                 if (err.message === 'invalid username') {
                     console.log(err)
@@ -56,11 +51,15 @@ const SocketProvider = (props) => {
             socket.on('me', (info) => {
                 setUser(info)
             })
+
+            socket.onAny((event, ...args) => {
+                console.log(event, args)
+            })
         }
-        if (!connected) {
-            socket.connect()
-            setConnected(true)
-        }
+        // if (!connected) {
+        //     socket.connect()
+        //     setConnected(true)
+        // }
     }, [connected])
 
     React.useEffect(() => {
