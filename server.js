@@ -82,64 +82,56 @@ const buzzer = {
 }
 
 io.on('connection', (socket) => {
-    const eventHandlers = {
-        user: new UserSocket(io, socket),
-    }
+    // const eventHandlers = {
+    //     user: new UserSocket(io, socket),
+    // }
+    //
+    // for (let category in eventHandlers) {
+    //     const handler = eventHandlers[category].handler
+    //     for (let event in handler) {
+    //         socket.on(event, handler[event])
+    //     }
+    // }
 
-    for (let category in eventHandlers) {
-        const handler = eventHandlers[category].handler
-        for (let event in handler) {
-            socket.on(event, handler[event])
-        }
-    }
-
-    // socket.emit('me', socket.info)
-
-    socket.onAny((event, ...args) => {
-        console.log('Logger: ', event, args)
+    socket.on('action', (action) => {
+        console.log({ action })
     })
+
+    // socket.onAny((event, ...args) => {
+    //     console.log('Logger: ', event, args)
+    // })
 
     // socket.on('connect', () => {
     //     console.log(socket.info)
     // })
 
-    socket.on('changeInfo', async (info) => {
-        socket.info = {
-            ...socket.info,
-            gameRoom: info.gameRoom,
-            username: info.username,
-            color: info.color,
-        }
-        console.log(socket.info)
-        socket.emit('me', socket.info)
-    })
-
-    socket.on('join', () => {
-        socket.join(`gameRoom${socket.info.gameRoom}`)
-    })
-
-    socket.on('userNameUpdate', () => {
-        console.log(socket.info)
-        console.log(socket.handshake.headers.cookie)
-    })
-
-    socket.on('buzzer', () => {
-        if (!buzzer.hasWinner) {
-            buzzer.hasWinner = true
-            io.emit('winner', socket.id)
-        }
-    })
-
-    socket.on('set_moderator', () => {})
-
-    socket.on('logout', () => {
-        console.log('io logout')
-    })
-
-    socket.on('reset_buzzer', () => {
-        buzzer.hasWinner = false
-        io.emit('winner', null)
-    })
+    //
+    // socket.on('join', () => {
+    //     socket.join(`gameRoom${socket.info.gameRoom}`)
+    // })
+    //
+    // socket.on('userNameUpdate', () => {
+    //     console.log(socket.info)
+    //     console.log(socket.handshake.headers.cookie)
+    // })
+    //
+    // socket.on('buzzer', () => {
+    //     if (!buzzer.hasWinner) {
+    //         buzzer.hasWinner = true
+    //         io.emit('winner', socket.id)
+    //     }
+    // })
+    //
+    // socket.on('set_moderator', () => {})
+    //
+    // socket.on('logout', () => {
+    //     console.log('io logout')
+    // })
+    //
+    // socket.on('reset_buzzer', () => {
+    //     buzzer.hasWinner = false
+    //     io.emit('winner', null)
+    // })
 
     socket.on('disconnect', () => {
         io.emit('users', getUsers())

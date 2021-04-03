@@ -4,8 +4,10 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "dev": "NODE_ENV=development nodemon -r dotenv/config --watch server.js --watch src --watch server --watch util --watch models server.js",
+        "dev": "npm run rm:dist && npm run dev:server",
+        "dev:server": "NODE_ENV=development nodemon -r dotenv/config --watch server.js --watch src --watch server --watch util --watch models server.js",
         "build": "NODE_ENV=production webpack",
+        "rm:dist": "rimraf ./dist",
         "start": "NODE_ENV=production node server.js",
         "start:local": "NODE_ENV=production node -r dotenv/config server.js ",
         "migrate:dev": "NODE_ENV=development npx sequelize-cli db:migrate",
@@ -17,6 +19,7 @@
         "@babel/core": "^7.13.1",
         "@babel/preset-env": "^7.13.5",
         "@babel/preset-react": "^7.12.13",
+        "@reduxjs/toolkit": "^1.5.1",
         "axios": "^0.21.1",
         "babel-loader": "^8.2.2",
         "babel-plugin-styled-components": "^1.12.0",
@@ -31,7 +34,10 @@
         "pug": "^3.0.2",
         "react": "^17.0.1",
         "react-dom": "^17.0.1",
+        "react-redux": "^7.2.3",
         "react-router-dom": "^5.2.0",
+        "redux": "^4.0.5",
+        "redux-socket.io": "^1.4.0",
         "sass": "^1.32.8",
         "sass-loader": "^11.0.1",
         "sequelize": "^6.5.0",
@@ -50,6 +56,7 @@
     "devDependencies": {
         "dotenv": "^8.2.0",
         "nodemon": "^2.0.7",
-        "prettier": "2.2.1"
+        "prettier": "2.2.1",
+        "rimraf": "^2.7.1"
     }
 }

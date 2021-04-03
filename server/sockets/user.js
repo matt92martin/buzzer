@@ -14,6 +14,23 @@ class UserSocket {
     me() {
         return this.io.emit('me', this.socket.info)
     }
+
+    async changeInfo(info) {
+        this.socket.info = {
+            ...this.socket.info,
+            gameRoom: info.gameRoom,
+            username: info.username,
+            color: info.color,
+        }
+        this.me()
+    }
+
+    handlers() {
+        return {
+            user_me: this.me,
+            user_getUsers: this.getUsers,
+        }
+    }
 }
 
 module.exports = UserSocket

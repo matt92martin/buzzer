@@ -1,10 +1,16 @@
-import { useUser } from '../context/user'
+{
+    /*Todo: User */
+}
+// import { useUser } from '../context/user'
 import { useHistory } from 'react-router-dom'
 import React from 'react'
 import axios from 'axios'
 
 const CreateGame = () => {
-    const userContext = useUser()
+    {
+        /*Todo: User */
+    }
+    // const userContext = useUser()
     const history = useHistory()
     const [moderator, setModerator] = React.useState('')
     const [moderatorPassword, setModeratorPassword] = React.useState('')
@@ -18,10 +24,13 @@ const CreateGame = () => {
                 moderatorPassword,
             })
             .then((res) => {
-                userContext.setUsername({
-                    username: res.data.game.moderator,
-                    moderator: true,
-                })
+                {
+                    /*Todo: User */
+                }
+                // userContext.setUsername({
+                //     username: res.data.game.moderator,
+                //     moderator: true,
+                // })
                 history.push(`/game/${res.data.game.id}`)
             })
             .catch((err) => {
