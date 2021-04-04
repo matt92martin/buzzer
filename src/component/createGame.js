@@ -1,16 +1,10 @@
-{
-    /*Todo: User */
-}
-// import { useUser } from '../context/user'
+import { useDispatch } from 'react-redux'
 import { useHistory } from 'react-router-dom'
 import React from 'react'
-import axios from 'axios'
+import { createGame } from '../redux/reducers/user'
 
 const CreateGame = () => {
-    {
-        /*Todo: User */
-    }
-    // const userContext = useUser()
+    const dispatch = useDispatch()
     const history = useHistory()
     const [moderator, setModerator] = React.useState('')
     const [moderatorPassword, setModeratorPassword] = React.useState('')
@@ -18,24 +12,14 @@ const CreateGame = () => {
     const onSubmit = (e) => {
         e.preventDefault()
 
-        axios
-            .post('/api/game/create', {
+        dispatch(
+            createGame({
                 moderator,
                 moderatorPassword,
             })
-            .then((res) => {
-                {
-                    /*Todo: User */
-                }
-                // userContext.setUsername({
-                //     username: res.data.game.moderator,
-                //     moderator: true,
-                // })
-                history.push(`/game/${res.data.game.id}`)
-            })
-            .catch((err) => {
-                console.log(err)
-            })
+        ).then((res) => {
+            history.push(`/game/${res.payload.id}`)
+        })
     }
 
     return (

@@ -35,12 +35,10 @@ router.post('/create', async (req, res) => {
         res.cookie(gameCookieName, game.id, { signed: true, sameSite: 'strict' })
 
         res.json({
-            game: {
-                moderator: game.moderator,
-                moderatorPassword: game.moderator_password,
-                id: game.id,
-                gamePassword: game.game_password,
-            },
+            moderator: game.moderator,
+            moderatorPassword: game.moderator_password,
+            id: game.id,
+            gamePassword: game.game_password,
         })
     } catch (e) {
         console.error(e)

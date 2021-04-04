@@ -1,10 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit'
-import userReducer from './reducers/user'
+import { gameReducer } from './reducers/user'
 import createSocketIoMiddleware from 'redux-socket.io'
 
 function reducer(state = {}, action) {
     switch (action.type) {
-        case 'message':
+        case 'io/message':
+            console.log(action.data)
             return Object.assign({}, { message: action.data })
         default:
             return state
@@ -16,7 +17,7 @@ export default (socket) => {
 
     return configureStore({
         reducer: {
-            user: userReducer,
+            game: gameReducer,
             socket: reducer,
         },
         middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(socketIoMiddleware),
