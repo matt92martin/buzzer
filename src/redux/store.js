@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit'
-import { gameReducer } from './reducers/user'
+import { gameReducer } from './reducers/game'
 import createSocketIoMiddleware from 'redux-socket.io'
 
 function reducer(state = {}, action) {

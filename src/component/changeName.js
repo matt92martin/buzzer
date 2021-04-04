@@ -1,34 +1,27 @@
 import React from 'react'
 import { useParams } from 'react-router-dom'
-{
-    /*Todo: User */
-}
-// import { useUser } from '../context/user'
+import { useDispatch } from 'react-redux'
+import { changeName } from '../redux/reducers/game'
 import { useSocket } from '../context/ws'
 
 const Player = () => {
     const params = useParams()
     const socket = useSocket()
     const [username, setUsername] = React.useState('')
-    {
-        /*Todo: User */
-    }
-    // const user = useUser()
+    const dispatch = useDispatch()
 
     const setUserName = (e, color) => {
         e.preventDefault()
-        {
-            /*Todo: User */
-        }
-        // user.createUserName({ username, color }).then((res) => {
-        //     if (res) {
-        //         socket.io.emit('changeInfo', {
-        //             gameRoom: params.id,
-        //             username,
-        //             color,
-        //         })
-        //     }
-        // })
+        dispatch(changeName({ username, color })).then((res) => {
+            dispatch({
+                type: 'server/change_info',
+                payload: {
+                    gameRoom: params.id,
+                    username,
+                    color,
+                },
+            })
+        })
     }
 
     return (

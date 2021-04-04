@@ -95,7 +95,15 @@ io.on('connection', (socket) => {
 
     socket.on('action', (action) => {
         console.log({ action })
-        socket.emit('action', { type: 'io/set_user', data: 'mmartin' })
+        switch (action.type) {
+            case 'server/change_info': {
+                console.log(action)
+                // socket.emit('action', { type: 'io/set_user', data: 'mmartin' })
+                break
+            }
+            default:
+                return
+        }
     })
 
     // socket.onAny((event, ...args) => {

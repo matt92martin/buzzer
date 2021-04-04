@@ -16,7 +16,7 @@ router.post('/name', async (req, res) => {
     const token = await createUser({ username, color })
 
     res.cookie(cookieName, token, { signed: true, sameSite: 'strict' })
-    res.json({ success: true, user: { username, color, uuid } })
+    res.json({ username, color, uuid })
 })
 
 router.get('/name', (req, res) => {

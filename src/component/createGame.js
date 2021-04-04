@@ -1,7 +1,7 @@
 import { useDispatch } from 'react-redux'
 import { useHistory } from 'react-router-dom'
 import React from 'react'
-import { createGame } from '../redux/reducers/user'
+import { createGame } from '../redux/reducers/game'
 
 const CreateGame = () => {
     const dispatch = useDispatch()
