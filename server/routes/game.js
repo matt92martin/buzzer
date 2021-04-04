@@ -97,7 +97,7 @@ router.post('/questions', async (req, res) => {
         return res.status(500).json({ error: 'You have too many questions per category!2' })
     }
 
-    const gameId = req.signedCookies[gameCookieName]
+    const gameId = req.locals.game
 
     let questions = []
 
@@ -137,7 +137,7 @@ router.post('/questions', async (req, res) => {
 
 router.get('/questions', async (req, res) => {
     const opts = req.body.question
-    const gameId = req.signedCookies[gameCookieName]
+    const gameId = req.locals.game
 
     const questions = await Question.findAll({ where: { gameId, ...opts } })
 
@@ -146,7 +146,7 @@ router.get('/questions', async (req, res) => {
 
 router.put('/question/:id', async (req, res) => {
     const id = +req.params.id
-    const gameId = +req.signedCookies[gameCookieName]
+    const gameId = req.locals.game
     const user = await jwtVerify(req.signedCookies[cookieName])
 
     console.log({ id, gameId })
@@ -190,8 +190,8 @@ router.post('/', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
     const id = req.params.id
-    const cookie = req.signedCookies[gameCookieName]
-    if (id === cookie) {
+    const gameId = req.locals.game
+    if (id === gameId) {
         res.json({ success: true })
     } else {
         res.status(401).json({ error: 'Try the password again' })

@@ -17,11 +17,7 @@ store.dispatch({ type: 'server/hello', data: 'Hello!' })
 export const IndexProvider = ({ children }) => {
     return (
         <BrowserRouter>
-            <ReduxProvider store={store}>
-                {/*<UserProvider>*/}
-                {children}
-                {/*</UserProvider>*/}
-            </ReduxProvider>
+            <ReduxProvider store={store}>{children}</ReduxProvider>
         </BrowserRouter>
     )
 }

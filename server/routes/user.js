@@ -19,7 +19,7 @@ router.post('/name', async (req, res) => {
     res.json({ username, color, uuid })
 })
 
-router.get('/name', (req, res) => {
+router.get('/me', (req, res) => {
     const user = res.locals.user
     if (user) {
         res.json({ username: user.username, uuid: user.uuid, color: user.color })

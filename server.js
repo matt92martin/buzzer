@@ -94,7 +94,6 @@ io.on('connection', (socket) => {
     // }
 
     socket.on('action', (action) => {
-        console.log({ action })
         switch (action.type) {
             case 'server/change_info': {
                 console.log(action)
