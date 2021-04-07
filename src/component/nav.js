@@ -1,14 +1,13 @@
 import React from 'react'
 import { Link, useHistory } from 'react-router-dom'
-import { useSocket } from '../context/ws'
-import axios from 'axios'
+import { useDispatch } from 'react-redux'
+import { logout } from '../redux/reducers/game'
 
 const Nav = () => {
-    const { logout } = useSocket()
+    const dispatch = useDispatch()
     const history = useHistory()
     const clickLogout = async () => {
-        logout()
-        await axios.post('/api/game/leave').then(() => {
+        dispatch(logout()).then(() => {
             history.push('/')
         })
     }

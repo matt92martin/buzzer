@@ -1,33 +1,64 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useParams, useHistory } from 'react-router-dom'
-import axios from 'axios'
+import { useDispatch, useSelector } from 'react-redux'
+import { createSelector } from '@reduxjs/toolkit'
 import { ChangeName } from '../component/changeName'
+import { GameWindow } from '../component/game/gameWindow'
 
-const GameWindow = ({ children }) => {
+const gameSelector = createSelector(
+    (state) => state.game,
+    (game) => game
+)
+
+const GameContainer = ({ children }) => {
+    const dispatch = useDispatch()
     const { id } = useParams()
     const history = useHistory()
-    const [isLoggedIn, setIsLoggedIn] = React.useState(false)
+    const game = useSelector(gameSelector)
+    const [isAllowed, setIsAllowed] = useState(null)
+
     React.useEffect(() => {
-        axios
-            .get(`/api/game/${id}`)
-            .then((res) => {
-                setIsLoggedIn(res.data.success)
-            })
-            .catch(() => {
-                history.push('/game/join')
-            })
-    }, [id])
-    if (!isLoggedIn) return <div>Loading...</div>
+        console.log(game)
+        if (game.gameId === Number(id)) {
+            setIsAllowed(true)
+        } else {
+            setIsAllowed(false)
+        }
+    }, [id, setIsAllowed])
+
+    React.useEffect(() => {
+        if (isAllowed) {
+            const info = {
+                username: game.username,
+                color: game.color,
+                gameId: Number(id),
+            }
+            console.log(info)
+            dispatch({ type: 'server/change_room', payload: { ...info } })
+        }
+    }, [dispatch, isAllowed])
+
+    if (isAllowed === false) {
+        return (
+            <div>
+                <p>You may not have had the correct password for this game. Please try again</p>
+                <div>
+                    <button onClick={() => history.push('/game/join')}>Go to Game Join page</button>
+                </div>
+            </div>
+        )
+    }
 
     return <div>{children}</div>
 }
 
 const Game = () => {
     return (
-        <GameWindow>
+        <GameContainer>
             <div>Game</div>
             <ChangeName />
-        </GameWindow>
+            <GameWindow />
+        </GameContainer>
     )
 }
 

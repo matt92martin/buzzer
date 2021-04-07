@@ -4,11 +4,11 @@ const webpack = require('webpack')
 const cookieParser = require('cookie-parser')
 const middleware = require('webpack-dev-middleware')
 const compiler = webpack(require('./webpack.config'))
-const { cookieSecret, PORT, cookieName, gameCookieName } = require('./config')
-const { parseSignedCookies } = require('./util/signedCookies')
-const { jwtVerify } = require('./server/db/jwt')
-const UserSocket = require('./server/sockets/user')
+const { cookieSecret, PORT } = require('./config')
 const sslRedirect = require('./util/general').sslRedirect
+const setLocals = require('./server/routes/locals')
+const serialize = require('serialize-javascript')
+const db = require('./models')
 
 const isDev = process.env.NODE_ENV === 'development'
 
@@ -26,78 +26,64 @@ if (isDev) {
     app.use(middleware(compiler))
 }
 
+app.use(setLocals)
 app.use('/api', require('./server/routes'))
 
-app.get('*', (req, res) => {
-    res.render('index')
+const { Game, User } = db
+app.get('*', async (req, res) => {
+    const { game: gameId, user: userId } = res.locals
+    const initialState = { game: {} }
+
+    if (gameId !== undefined) {
+        const game = await Game.findOne({ where: { id: gameId } })
+
+        initialState.game.gameId = game.id
+        initialState.game.gamePassword = game.game_password
+    }
+
+    if (userId !== undefined) {
+        const user = await User.findOne({ where: { id: userId } })
+
+        initialState.game.username = user.username
+        initialState.game.color = user.color
+        initialState.game.userId = user.id
+    }
+
+    res.render('index', { initialState: serialize(initialState) })
 })
 
-const setUserInfo = async (socket) => {
-    try {
-        const gameRoomCookie = parseSignedCookies(socket.handshake.headers.cookie, cookieSecret, gameCookieName)
-
-        socket.info = {
-            ...socket.info,
-            gameRoom: gameRoomCookie,
-        }
-
-        const userInfoCookie = parseSignedCookies(socket.handshake.headers.cookie, cookieSecret, cookieName)
-        const userInfoJson = await jwtVerify(userInfoCookie).catch(() => ({}))
-
-        socket.info = {
-            ...socket.info,
-            username: userInfoJson.username,
-            color: userInfoJson.color,
-            moderator: userInfoJson.moderator,
-        }
-    } catch (e) {
-        console.error('IO Middleware: ', e)
-    } finally {
-        // socket.emit('me', socket.info)
+const getRoomsUsers = (io, gameId) => {
+    const room = io.sockets.adapter.rooms.get(gameId)
+    const users = []
+    for (const clientId of room) {
+        users.push(io.sockets.sockets.get(clientId).info)
     }
+
+    return users
 }
 
 const server = http.createServer(app)
 const io = require('socket.io')(server)
 
-io.use(async (socket, next) => {
-    // await setUserInfo(socket)
-    next()
-})
-
-const getUsers = () => {
-    const users = []
-    for (let [id, socket] of io.of('/').sockets) {
-        users.push({
-            userId: id,
-            username: socket?.info?.username,
-            color: socket?.info?.color,
-        })
-    }
-    return users
-}
-
-const buzzer = {
-    hasWinner: false,
-}
-
 io.on('connection', (socket) => {
-    // const eventHandlers = {
-    //     user: new UserSocket(io, socket),
-    // }
-    //
-    // for (let category in eventHandlers) {
-    //     const handler = eventHandlers[category].handler
-    //     for (let event in handler) {
-    //         socket.on(event, handler[event])
-    //     }
-    // }
+    socket.info = {}
 
     socket.on('action', (action) => {
+        console.log(action)
         switch (action.type) {
             case 'server/change_info': {
-                console.log(action)
-                // socket.emit('action', { type: 'io/set_user', data: 'mmartin' })
+                socket.info.user = action.payload
+                const users = getRoomsUsers(io, action.payload.gameId)
+
+                io.in(action.payload.gameId).emit('action', { type: 'io/set_users', payload: { users } })
+                break
+            }
+            case 'server/change_room': {
+                socket.info.user = action.payload
+                socket.join(action.payload.gameId)
+                const users = getRoomsUsers(io, action.payload.gameId)
+
+                io.in(action.payload.gameId).emit('action', { type: 'io/set_users', payload: { users } })
                 break
             }
             default:
@@ -105,44 +91,7 @@ io.on('connection', (socket) => {
         }
     })
 
-    // socket.onAny((event, ...args) => {
-    //     console.log('Logger: ', event, args)
-    // })
-
-    // socket.on('connect', () => {
-    //     console.log(socket.info)
-    // })
-
-    //
-    // socket.on('join', () => {
-    //     socket.join(`gameRoom${socket.info.gameRoom}`)
-    // })
-    //
-    // socket.on('userNameUpdate', () => {
-    //     console.log(socket.info)
-    //     console.log(socket.handshake.headers.cookie)
-    // })
-    //
-    // socket.on('buzzer', () => {
-    //     if (!buzzer.hasWinner) {
-    //         buzzer.hasWinner = true
-    //         io.emit('winner', socket.id)
-    //     }
-    // })
-    //
-    // socket.on('set_moderator', () => {})
-    //
-    // socket.on('logout', () => {
-    //     console.log('io logout')
-    // })
-    //
-    // socket.on('reset_buzzer', () => {
-    //     buzzer.hasWinner = false
-    //     io.emit('winner', null)
-    // })
-
     socket.on('disconnect', () => {
-        io.emit('users', getUsers())
         console.log('user disconnected')
     })
 })

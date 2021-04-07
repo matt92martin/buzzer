@@ -1,6 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { gameReducer } from './reducers/game'
+import { questionReducer } from './reducers/questions'
 import createSocketIoMiddleware from 'redux-socket.io'
+
+const initialState = window.__PRELOADED_STATE__
+delete window.__PRELOADED_STATE__
 
 function reducer(state = {}, action) {
     switch (action.type) {
@@ -12,14 +16,16 @@ function reducer(state = {}, action) {
     }
 }
 
-export default (socket) => {
+export default (socket, preloadedState) => {
     let socketIoMiddleware = createSocketIoMiddleware(socket, 'server/')
 
     return configureStore({
         reducer: {
-            game: gameReducer,
+            game: gameReducer(initialState.game),
+            question: questionReducer,
             socket: reducer,
         },
+        preloadedState,
         middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(socketIoMiddleware),
     })
 }

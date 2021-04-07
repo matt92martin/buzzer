@@ -1,18 +1,19 @@
 import React from 'react'
-// import { SocketProvider } from './ws'
-// import { UserProvider } from './user'
 import { BrowserRouter } from 'react-router-dom'
 import { io } from 'socket.io-client'
 import { Provider as ReduxProvider } from 'react-redux'
 import createStore from '../redux/store'
 
-const store = createStore(io())
+const socket = io()
+const store = createStore(socket)
+
+// socket.onAny((...args) => {
+//     console.log(args)
+// })
 
 store.subscribe(() => {
     console.log('new client state', store.getState())
 })
-
-store.dispatch({ type: 'server/hello', data: 'Hello!' })
 
 export const IndexProvider = ({ children }) => {
     return (

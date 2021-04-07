@@ -1,15 +1,13 @@
 const { Router } = require('express')
 const { makeid } = require('../../util/random')
-const { jwtVerify } = require('../db/jwt')
 const db = require('../../models')
 const { gameCookieName, cookieName } = require('../../config')
-const { createUser } = require('./user')
 const axios = require('axios')
 const { wait } = require('../../util/general')
 
 const router = Router()
 
-const { Game, Question } = db
+const { Game, Question, User } = db
 
 // Create game by providing moderator name and moderator password
 // returns moderator, moderator password, game passphrase
@@ -29,15 +27,17 @@ router.post('/create', async (req, res) => {
 
     try {
         const game = await Game.create(gameOpts)
+        const user = await User.create({ username: gameOpts.moderator, gameId: game.id, color: 'mod' })
+        await Game.update({ moderatorId: user.id }, { where: { id: game.id } })
 
-        const token = await createUser({ username: game.moderator, moderator: true })
-        res.cookie(cookieName, token, { signed: true, sameSite: 'strict' })
+        res.cookie(cookieName, user.id, { signed: true, sameSite: 'strict' })
         res.cookie(gameCookieName, game.id, { signed: true, sameSite: 'strict' })
 
         res.json({
-            moderator: game.moderator,
-            moderatorPassword: game.moderator_password,
-            id: game.id,
+            moderator: user.username,
+            gameId: game.id,
+            userId: user.id,
+            color: user.color,
             gamePassword: game.game_password,
         })
     } catch (e) {
@@ -61,17 +61,17 @@ router.post('/login', async (req, res) => {
 
     try {
         const game = await Game.findOne({ where: gameOpts })
+        const user = await User.findOne({ where: { id: game.moderatorId } })
 
-        const token = await createUser({ username: game.moderator, moderator: true })
-        res.cookie(cookieName, token, { signed: true, sameSite: 'strict' })
+        res.cookie(cookieName, game.moderatorId, { signed: true, sameSite: 'strict' })
         res.cookie(gameCookieName, game.id, { signed: true, sameSite: 'strict' })
 
         res.json({
-            game: {
-                moderator: game.moderator,
-                id: game.id,
-                gamePassword: game.game_password,
-            },
+            moderator: user.username,
+            gameId: game.id,
+            userId: user.id,
+            color: user.color,
+            gamePassword: game.game_password,
         })
     } catch (e) {
         console.error(e)
@@ -147,10 +147,11 @@ router.get('/questions', async (req, res) => {
 router.put('/question/:id', async (req, res) => {
     const id = +req.params.id
     const gameId = req.locals.game
-    const user = await jwtVerify(req.signedCookies[cookieName])
+    const userId = req.signedCookies[cookieName]
 
-    console.log({ id, gameId })
-    if (user?.moderator) {
+    const game = await Game.findOne({ where: { id: gameId } })
+
+    if (game.moderatorId === userId) {
         const question = await Question.update(
             { answered: true },
             {
@@ -185,16 +186,6 @@ router.post('/', async (req, res) => {
     } catch (e) {
         console.error(e)
         res.status(404).json({ error: 'Not found' })
-    }
-})
-
-router.get('/:id', async (req, res) => {
-    const id = req.params.id
-    const gameId = req.locals.game
-    if (id === gameId) {
-        res.json({ success: true })
-    } else {
-        res.status(401).json({ error: 'Try the password again' })
     }
 })
 

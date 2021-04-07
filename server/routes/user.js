@@ -1,36 +1,17 @@
 const { Router } = require('express')
 const { cookieName } = require('../../config')
-const { jwtSign } = require('../db/jwt')
-const { v4: uuidV4 } = require('uuid')
+const db = require('../../models')
 
 const router = Router()
 
-const createUser = async ({ username, color, moderator, uuid }) => {
-    return await jwtSign({ username, uuid, color, moderator })
-}
+const { User } = db
 
 router.post('/name', async (req, res) => {
-    let { username, color } = req.body
+    let { username, color, gameId } = req.body
+    const user = await User.create({ username, color, gameId })
 
-    const uuid = uuidV4()
-    const token = await createUser({ username, color })
-
-    res.cookie(cookieName, token, { signed: true, sameSite: 'strict' })
-    res.json({ username, color, uuid })
+    res.cookie(cookieName, user.id, { signed: true, sameSite: 'strict' })
+    res.json({ username, color, id: user.id })
 })
 
-router.get('/me', (req, res) => {
-    const user = res.locals.user
-    if (user) {
-        res.json({ username: user.username, uuid: user.uuid, color: user.color })
-    } else {
-        res.json({ username: undefined, uuid: undefined, color: undefined })
-    }
-})
-
-router.post('/logout', (req, res) => {
-    res.clearCookie(cookieName)
-    res.json({ success: true })
-})
-
-module.exports = { UserRouter: router, createUser }
+module.exports = { UserRouter: router }

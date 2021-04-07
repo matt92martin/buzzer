@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux'
 import { changeName } from '../redux/reducers/game'
 import { useSocket } from '../context/ws'
 
-const Player = () => {
+const ChangeName = () => {
     const params = useParams()
     const socket = useSocket()
     const [username, setUsername] = React.useState('')
@@ -12,11 +12,15 @@ const Player = () => {
 
     const setUserName = (e, color) => {
         e.preventDefault()
-        dispatch(changeName({ username, color })).then((res) => {
+        dispatch(changeName({ username, color, gameId: Number(params.id) })).then((res) => {
+            if (res.error) {
+                return
+            }
+
             dispatch({
                 type: 'server/change_info',
                 payload: {
-                    gameRoom: params.id,
+                    gameId: Number(params.id),
                     username,
                     color,
                 },
@@ -36,14 +40,6 @@ const Player = () => {
                 </button>
             </div>
         )
-    )
-}
-
-const ChangeName = () => {
-    return (
-        <>
-            <Player />
-        </>
     )
 }
 

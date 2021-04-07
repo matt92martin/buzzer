@@ -18,6 +18,9 @@ const CreateGame = () => {
                 moderatorPassword,
             })
         ).then((res) => {
+            if (res.error) {
+                return
+            }
             history.push(`/game/${res.payload.id}`)
         })
     }
