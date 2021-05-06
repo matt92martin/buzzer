@@ -86,6 +86,19 @@ io.on('connection', (socket) => {
                 io.in(action.payload.gameId).emit('action', { type: 'io/set_users', payload: { users } })
                 break
             }
+            case 'server/question/add_query_setting': {
+                socket
+                    .to(action.payload.gameId)
+                    .emit('action', { type: 'io/question/add_player_query_setting', payload: action.payload.query })
+                break
+            }
+            case 'server/question/update_query_setting': {
+                const { gameId, values } = action.payload
+                socket
+                    .to(gameId)
+                    .emit('action', { type: 'io/question/update_player_query_setting', payload: { values } })
+            }
+
             default:
                 return
         }

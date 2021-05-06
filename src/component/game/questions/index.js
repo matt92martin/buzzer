@@ -1,27 +1,30 @@
 import React from 'react'
-import { makeStyles } from '@material-ui/core/styles'
-import Slider from '@material-ui/core/Slider'
+import { QuestionSettings } from './questionSettings'
+import { QuestionWindow } from './questionWindow'
+import { createSelector } from '@reduxjs/toolkit'
+import { useSelector } from 'react-redux'
 
-const useStyles = makeStyles({
-    root: {
-        width: 200,
-    },
-})
+const questionSelector = createSelector(
+    (state) => state.question.questions,
+    (questions) => questions
+)
+const isModSelector = createSelector(
+    (state) => state.game,
+    (game) => game.color === 'mod'
+)
 
 const Questions = () => {
-    const classes = useStyles()
-    const [value, setValue] = React.useState(30)
-
-    const handleChange = (event, newValue) => {
-        setValue(newValue)
-    }
+    const questions = useSelector(questionSelector)
+    const isMod = useSelector(isModSelector)
 
     return (
-        <div className={classes.root}>
-            <h2>Questions</h2>
-            <div>Value: {value}</div>
-            <Slider value={value} onChange={handleChange} aria-labelledby="continuous-slider" />
-        </div>
+        <>
+            {questions.length ? (
+                <QuestionWindow questions={questions} isMod={isMod} />
+            ) : (
+                <QuestionSettings isMod={isMod} />
+            )}
+        </>
     )
 }
 

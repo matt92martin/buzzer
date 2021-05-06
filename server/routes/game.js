@@ -86,27 +86,41 @@ router.post('/leave', async (req, res) => {
 })
 
 router.post('/questions', async (req, res) => {
+    const userId = req.signedCookies[cookieName]
+    const gameId = req.signedCookies[gameCookieName]
+
     const categories = req.body.categories
 
     if (categories.length > 20) {
         return res.status(500).json({ error: 'Too many categories!' })
     }
-    const maxQuestions = Math.max(...categories.map((c) => c.amount))
+
+    const maxQuestions = Math.add(...categories.map((c) => c.amount))
 
     if (maxQuestions > 10) {
-        return res.status(500).json({ error: 'You have too many questions per category!2' })
+        return res.status(500).json({ error: 'You have too many questions per category!' })
     }
 
-    const gameId = req.locals.game
+    const total = categories.reduce((a, b) => a + b.amount, 0)
+
+    if (total > 100) {
+        return res.status(500).json({ error: 'You have too many questions!' })
+    }
+
+    const user = await User.findOne({ where: { id: userId } })
+
+    if (user.gameId !== gameId || user.color !== 'mod') {
+        return res.status(500).json({ error: 'You have too many questions per category!' })
+    }
 
     let questions = []
 
     try {
         for (let category of categories) {
             const params = {
-                amount: category.amount,
-                category: category.categoryId,
-                difficulty: category.difficulty,
+                category: category[0],
+                difficulty: category[1],
+                amount: category[2],
                 type: 'multiple',
             }
 
@@ -125,7 +139,7 @@ router.post('/questions', async (req, res) => {
             )
 
             questions = questions.concat(res)
-            await wait(500)
+            await wait(100)
         }
 
         const savedQuestions = await Question.bulkCreate(questions)
@@ -136,10 +150,16 @@ router.post('/questions', async (req, res) => {
 })
 
 router.get('/questions', async (req, res) => {
-    const opts = req.body.question
-    const gameId = req.locals.game
+    const gameId = req.signedCookies[gameCookieName]
+    const userId = req.signedCookies[cookieName]
 
-    const questions = await Question.findAll({ where: { gameId, ...opts } })
+    const user = await User.findOne({ where: { id: userId } })
+
+    if (user.gameId !== gameId) {
+        return res.status(401).json({ error: 'Access denied' })
+    }
+
+    const questions = await Question.findAll({ where: { gameId } })
 
     res.json(questions)
 })
